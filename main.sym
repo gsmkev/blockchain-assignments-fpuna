@@ -1,0 +1,11 @@
+1,1,2,main.c
+2,2,2,main.p
+3,3,2,main.a
+4,4,2,main.b
+5,-1,2,main.sum
+6,-1,1,main.mod.out
+7,-1,1,main.mod.in
+8,5,0,main.sqrt_a.out
+9,-1,0,main.sqrt_a.in
+10,6,0,main.sqrt_b.out
+11,-1,0,main.sqrt_b.in
