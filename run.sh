@@ -1,8 +1,12 @@
+#!/bin/bash
+
 # Ejecute el siguiente comando para crear el código que genera el vector de testigos
 circom main.circom --r1cs --sym --wasm
 
-# Para leer el archivo R1CS, utilizamos snarkjs de la siguiente manera:
-snarkjs r1cs print main.r1cs
+# Para leer el archivo R1CS, utilizamos snarkjs de la siguiente manera si se pasa el parámetro 'snark':
+if [[ "$1" == "snark" || "$2" == "snark" ]]; then
+  snarkjs r1cs print main.r1cs
+fi
 
 # Crear el archivo de entrada dentro de la carpeta main_js
 cd main_js
@@ -15,4 +19,8 @@ echo '{
 # Ahora calculamos y exportamos el testigo con el siguiente comando:
 node generate_witness.js main.wasm input.json witness.wtns
 snarkjs wtns export json witness.wtns
-cat witness.json
+
+# Mostrar el contenido de witness.json si se pasa el parámetro 'witness':
+if [[ "$1" == "witness" || "$2" == "witness" ]]; then
+  cat witness.json
+fi

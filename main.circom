@@ -1,19 +1,6 @@
 pragma circom 2.1.6;
 
-// Componente que calcula el cuadrado de un número
-template Square() {
-  signal input in;
-  signal output out;
-  out <== in * in;
-}
-
-// Componente que calcula el módulo de un número
-template mod() {
-  // TODO: Implementar la reducción de módulo
-  signal input in;
-  signal output out;
-  out <== in;
-}
+include "utils.circom";
 
 template TP1() {
   // Señales privadas de entrada
@@ -32,37 +19,19 @@ template TP1() {
   // Componentes internos 
   component sqrt_a = Square();
   component sqrt_b = Square();
-  component mod = mod();
+  component modr = Mod(7);
 
   // Conexiones
   sqrt_a.in <== a;
   sqrt_b.in <== b;
 
   sum <== sqrt_a.out + sqrt_b.out;
-  mod.in <== sum;
+  modr.in <== sum;
 
   // Salida
-  c <== mod.out;
+  c <== modr.out;
+  log("\nEl resultado de ", a, "^2 + ", b, "^2 mod ", p, " es ", c);
 }
 
 // Componente principal
 component main {public [p]} = TP1();
-
-/* 
-  Con la siguiente entrada
-  {
-    "a": "2",
-    "b": "3",
-    "p": "5"
-  }
-  Obtenemos la salida tiene la siguiente estructura
-  {
-    "1": "1",
-    "c": "13"
-    "p": "5",
-    "a": "2",
-    "b": "3",
-    "a^2": "4",
-    "b^2": "9",            
-  }
-*/
