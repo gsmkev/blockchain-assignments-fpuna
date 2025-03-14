@@ -10,11 +10,6 @@ compile() {
     echo "✅ Compilación completada."
 }
 
-# Función para imprimir el R1CS
-print_r1cs() {
-    echo "🔹 Mostrando contenido de main.r1cs..."
-    snarkjs r1cs print main.r1cs
-}
 
 # Función para generar el testigo
 generate_witness() {
@@ -74,13 +69,6 @@ fi
 case "$1" in
     compile)
         compile
-        ;;
-    snark)
-        print_r1cs
-        ;;
-    witness)
-        generate_witness
-        cat main_js/witness.json
         ;;
     proof)
         generate_proof
