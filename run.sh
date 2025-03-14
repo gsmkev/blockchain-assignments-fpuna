@@ -12,8 +12,7 @@ fi
 cd main_js
 echo '{
   "a": "2",
-  "b": "3",
-  "p": "5"
+  "b": "3"
 }' > input.json
 
 # Ahora calculamos y exportamos el testigo con el siguiente comando:

@@ -7,9 +7,6 @@ template TP1() {
   signal input a;
   signal input b;
 
-  // Señal pública de entrada
-  signal input p;
-
   // Señal pública de salida
   signal output c;
   
@@ -30,8 +27,8 @@ template TP1() {
 
   // Salida
   c <== modr.out;
-  log("\nEl resultado de ", a, "^2 + ", b, "^2 mod ", p, " es ", c);
+  log("\nEl resultado de ", a, "^2 + ", b, "^2 mod ", 7, " es ", c);
 }
 
 // Componente principal
-component main {public [p]} = TP1();
+component main = TP1();
