@@ -17,3 +17,14 @@ node_modules/
 
 # Ignore the main_js directory
 main_js/
+
+# Ignore specific files
+main_0000.zkey
+main_final.zkey
+pot12_0000.ptau
+pot12_final.ptau
+pot12_final_prepared.ptau
+prueba.json
+public.json
+verification_key.json
+input.json
