@@ -14,3 +14,6 @@ Cargo.lock
 *.pdb
 
 node_modules/
+
+# Ignore the main_js directory
+main_js/
