@@ -69,19 +69,20 @@ export async function purchaseNFT(tokenId: number, price: string) {
   await tx.wait();
 }
 
-export async function mintInitialBatch() {
+export async function mintInitialBatch(count: number = 10) {
   const contract = await getContract();
 
-  for (let i = 0; i < 10; i++) {
-    const uri = `https://via.placeholder.com/200?text=NFT+${i}`;
+  for (let i = 0; i < count; i++) {
+    const seed = Date.now() + i;
+    const uri = `https://picsum.photos/200?random=${seed}`;
     const price = ethers.utils.parseEther("0.01");
 
     try {
-      console.log(`Minting NFT ${i} with URI: ${uri} and price: ${price}`);
+      console.log(`Minting NFT ${i + 1} with URI: ${uri} and price: ${price}`);
       const tx = await contract.mintAndList(uri, price);
       await tx.wait();
     } catch (e) {
-      console.error(`Error minting NFT ${i}:`, e);
+      console.error(`Error minting NFT ${i + 1}:`, e);
     }
   }
 }

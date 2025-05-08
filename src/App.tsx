@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   connectWallet,
   getAllListings,
@@ -9,6 +9,7 @@ import {
 import NFTCard from "./components/NFTCard";
 import WalletConnect from "./components/WalletConnect";
 import { FaStore, FaPalette, FaGift } from "react-icons/fa";
+import { ToastContainer, toast } from "react-toastify";
 import "./App.css";
 
 function App() {
@@ -17,13 +18,25 @@ function App() {
   const [activeTab, setActiveTab] = useState<"store" | "minted" | "purchased">(
     "store"
   );
+  const [mintCount, setMintCount] = useState<number>(1);
 
   const CONTRACT_OWNER =
     "0x910b03584659f87344c8b0dffe23da6a1a3ff41c".toLowerCase();
 
+  const firstLoadDone = useRef(false);
+
   const loadItems = async () => {
     const data = await getAllListings();
     setNfts(data);
+
+    if (!firstLoadDone.current) {
+      if (data.length === 0) {
+        toast.info("No hay NFTs disponibles en la tienda.");
+      } else {
+        toast.success("NFTs cargados correctamente.");
+      }
+      firstLoadDone.current = true;
+    }
   };
 
   const silentConnect = async () => {
@@ -35,6 +48,7 @@ function App() {
         const acc = await connectWallet();
         setAccount(acc);
         localStorage.setItem("connected", "true");
+        toast.info("👋 Bienvenido de vuelta.");
       } catch (err) {
         console.warn("Silent wallet connect failed:", err);
       }
@@ -46,14 +60,22 @@ function App() {
       const acc = await connectWallet();
       setAccount(acc);
       localStorage.setItem("connected", "true");
+      toast.success("🔗 Wallet conectada correctamente");
     } catch (err) {
-      console.error("User rejected connection.");
+      console.error("Conexión rechazada.");
+      toast.error("❌ El usuario rechazó la conexión.");
     }
   };
 
   const handleBuy = async (tokenId: number, price: string) => {
-    await purchaseNFT(tokenId, price);
-    await loadItems();
+    try {
+      await purchaseNFT(tokenId, price);
+      toast.success(`¡Compra exitosa del NFT #${tokenId} por ${price} ETH!`);
+      await loadItems();
+    } catch (err) {
+      console.error("Error al comprar:", err);
+      toast.error("Hubo un problema al realizar la compra.");
+    }
   };
 
   const handleMint = async () => {
@@ -61,15 +83,17 @@ function App() {
       if (!account) {
         await handleConnect();
       }
-      await mintInitialBatch();
+      await mintInitialBatch(mintCount);
+      toast.success(`🎉 Se mintearon ${mintCount} NFT(s) exitosamente`);
       await loadItems();
     } catch (err) {
-      console.error("Mint failed:", err);
+      console.error("Mint fallido:", err);
+      toast.error("❌ Error al mintear los NFTs.");
     }
   };
 
   useEffect(() => {
-    silentConnect().finally(() => loadItems());
+    silentConnect().then(() => loadItems());
   }, []);
 
   const marketplaceNFTs = nfts.filter((nft) => !nft.isSold);
@@ -97,21 +121,98 @@ function App() {
       <WalletConnect account={account} onConnect={handleConnect} />
 
       {account?.toLowerCase() === CONTRACT_OWNER && (
-        <button
-          onClick={handleMint}
+        <div
           style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: "10px",
             margin: "20px 0",
-            padding: "10px 24px",
-            backgroundColor: "#28a745",
-            border: "none",
-            borderRadius: "8px",
-            color: "#fff",
-            fontWeight: "bold",
-            cursor: "pointer",
           }}
         >
-          🧙‍♂️ Mint Lote Inicial
-        </button>
+          <button
+            onClick={handleMint}
+            style={{
+              padding: "10px 24px",
+              backgroundColor: "#28a745",
+              border: "none",
+              borderRadius: "8px",
+              color: "#fff",
+              fontWeight: "bold",
+              cursor: "pointer",
+            }}
+          >
+            🧙‍♂️ Mint {mintCount} NFT{mintCount > 1 ? "s" : ""}
+          </button>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              backgroundColor: "#1f1f1f",
+              border: "1px solid #555",
+              borderRadius: "8px",
+              padding: "6px",
+              gap: "8px",
+            }}
+          >
+            <button
+              onClick={() => setMintCount((prev) => Math.max(1, prev - 1))}
+              style={{
+                padding: "6px 12px",
+                backgroundColor: "#444",
+                border: "none",
+                borderRadius: "6px",
+                color: "#fff",
+                fontWeight: "bold",
+                cursor: "pointer",
+                fontSize: "18px",
+                transition: "background 0.2s",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.backgroundColor = "#555")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.backgroundColor = "#444")
+              }
+            >
+              –
+            </button>
+
+            <span
+              style={{
+                minWidth: "40px",
+                textAlign: "center",
+                fontSize: "16px",
+                color: "#fff",
+              }}
+            >
+              {mintCount}
+            </span>
+
+            <button
+              onClick={() => setMintCount((prev) => Math.min(10, prev + 1))}
+              style={{
+                padding: "6px 12px",
+                backgroundColor: "#444",
+                border: "none",
+                borderRadius: "6px",
+                color: "#fff",
+                fontWeight: "bold",
+                cursor: "pointer",
+                fontSize: "18px",
+                transition: "background 0.2s",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.backgroundColor = "#555")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.backgroundColor = "#444")
+              }
+            >
+              +
+            </button>
+          </div>
+        </div>
       )}
 
       <div
@@ -167,6 +268,18 @@ function App() {
             />
           ))}
       </div>
+
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
     </div>
   );
 }
