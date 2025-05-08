@@ -8,17 +8,21 @@ import {
 } from "./utils/marketplace";
 import NFTCard from "./components/NFTCard";
 import WalletConnect from "./components/WalletConnect";
+import { FaStore, FaPalette, FaGift } from "react-icons/fa";
+import "./App.css";
 
 function App() {
   const [account, setAccount] = useState<string | null>(null);
   const [nfts, setNfts] = useState<NFTItem[]>([]);
+  const [activeTab, setActiveTab] = useState<"store" | "minted" | "purchased">(
+    "store"
+  );
+
   const CONTRACT_OWNER =
     "0x910b03584659f87344c8b0dffe23da6a1a3ff41c".toLowerCase();
 
   const loadItems = async () => {
-    console.log("Loading NFTs...");
     const data = await getAllListings();
-    console.log("NFTs loaded:", data);
     setNfts(data);
   };
 
@@ -48,7 +52,6 @@ function App() {
   };
 
   const handleBuy = async (tokenId: number, price: string) => {
-    console.log(`Intentando comprar token ${tokenId} por ${price} ETH`);
     await purchaseNFT(tokenId, price);
     await loadItems();
   };
@@ -70,61 +73,99 @@ function App() {
   }, []);
 
   const marketplaceNFTs = nfts.filter((nft) => !nft.isSold);
-
   const myMintedNFTs = nfts.filter(
     (nft) => !nft.isSold && nft.owner.toLowerCase() === account?.toLowerCase()
   );
-
   const myPurchasedNFTs = nfts.filter(
     (nft) => nft.isSold && nft.owner.toLowerCase() === account?.toLowerCase()
   );
 
+  const tabStyle = (tab: string) => ({
+    padding: "12px 24px",
+    margin: "0 8px",
+    borderRadius: "8px",
+    backgroundColor: activeTab === tab ? "#007bff" : "#333",
+    color: activeTab === tab ? "#fff" : "#ccc",
+    cursor: "pointer",
+    fontWeight: "bold",
+    border: "none",
+  });
+
   return (
-    <div>
-      <h1>NFT Marketplace</h1>
+    <div className="container">
+      <h1 style={{ marginBottom: "10px" }}>NFT Marketplace</h1>
       <WalletConnect account={account} onConnect={handleConnect} />
+
       {account?.toLowerCase() === CONTRACT_OWNER && (
-        <button onClick={handleMint}>Mint Lote Inicial</button>
+        <button
+          onClick={handleMint}
+          style={{
+            margin: "20px 0",
+            padding: "10px 24px",
+            backgroundColor: "#28a745",
+            border: "none",
+            borderRadius: "8px",
+            color: "#fff",
+            fontWeight: "bold",
+            cursor: "pointer",
+          }}
+        >
+          🧙‍♂️ Mint Lote Inicial
+        </button>
       )}
 
-      <h2>🛒 NFTs en venta</h2>
-      <div style={{ display: "flex", flexWrap: "wrap" }}>
-        {marketplaceNFTs.map((nft) => (
-          <NFTCard
-            key={nft.tokenId}
-            nft={nft}
-            onBuy={handleBuy}
-            currentAccount={account || ""}
-          />
-        ))}
+      <div
+        style={{ display: "flex", justifyContent: "center", marginTop: "30px" }}
+      >
+        <button style={tabStyle("store")} onClick={() => setActiveTab("store")}>
+          <FaStore /> Tienda
+        </button>
+        {account?.toLowerCase() === CONTRACT_OWNER && (
+          <button
+            style={tabStyle("minted")}
+            onClick={() => setActiveTab("minted")}
+          >
+            <FaPalette /> Mis Minteados
+          </button>
+        )}
+        <button
+          style={tabStyle("purchased")}
+          onClick={() => setActiveTab("purchased")}
+        >
+          <FaGift /> Mis Comprados
+        </button>
       </div>
 
-      {account?.toLowerCase() === CONTRACT_OWNER && (
-        <>
-          <h2>🎨 NFTs que minteé</h2>
-          <div style={{ display: "flex", flexWrap: "wrap" }}>
-            {myMintedNFTs.map((nft) => (
-              <NFTCard
-                key={nft.tokenId}
-                nft={nft}
-                onBuy={() => {}}
-                currentAccount={account || ""}
-              />
-            ))}
-          </div>
-        </>
-      )}
+      <div className="grid">
+        {activeTab === "store" &&
+          marketplaceNFTs.map((nft) => (
+            <NFTCard
+              key={nft.tokenId}
+              nft={nft}
+              onBuy={handleBuy}
+              currentAccount={account || ""}
+            />
+          ))}
 
-      <h2>🎁 NFTs que compré</h2>
-      <div style={{ display: "flex", flexWrap: "wrap" }}>
-        {myPurchasedNFTs.map((nft) => (
-          <NFTCard
-            key={nft.tokenId}
-            nft={nft}
-            onBuy={() => {}}
-            currentAccount={account || ""}
-          />
-        ))}
+        {activeTab === "minted" &&
+          myMintedNFTs.map((nft) => (
+            <NFTCard
+              key={nft.tokenId}
+              nft={nft}
+              onBuy={() => {}}
+              currentAccount={account || ""}
+            />
+          ))}
+
+        {activeTab === "purchased" &&
+          myPurchasedNFTs.map((nft) => (
+            <NFTCard
+              key={nft.tokenId}
+              nft={nft}
+              onBuy={() => {}}
+              currentAccount={account || ""}
+            />
+          ))}
       </div>
     </div>
   );

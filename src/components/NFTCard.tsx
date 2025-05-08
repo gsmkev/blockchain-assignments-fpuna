@@ -1,3 +1,7 @@
+import { FaEthereum } from "react-icons/fa";
+import { BsCheckCircleFill } from "react-icons/bs";
+import { AiOutlineShoppingCart } from "react-icons/ai";
+import { TbCoins } from "react-icons/tb";
 import type { NFTItem } from "../utils/marketplace";
 
 type Props = {
@@ -9,14 +13,15 @@ type Props = {
 export default function NFTCard({ nft, onBuy, currentAccount }: Props) {
   const isOwner = currentAccount?.toLowerCase() === nft.owner.toLowerCase();
   const isSold = nft.isSold;
+
   const cardStyle = {
     border: "1px solid #333",
-    borderRadius: "10px",
-    width: "220px",
+    borderRadius: "14px",
+    width: "250px",
     margin: "10px",
-    padding: "10px",
-    backgroundColor: isSold ? "#f2f2f2" : "#1e1e1e",
-    color: isSold ? "#888" : "#fff",
+    padding: "16px",
+    backgroundColor: "#1e1e1e",
+    color: "#fff",
     boxShadow: "0 4px 8px rgba(0,0,0,0.2)",
     textAlign: "center" as const,
   };
@@ -26,35 +31,58 @@ export default function NFTCard({ nft, onBuy, currentAccount }: Props) {
       <img
         src={nft.uri}
         alt={`NFT ${nft.tokenId}`}
-        width="180"
-        height="180"
-        style={{ objectFit: "cover", borderRadius: "8px" }}
+        width="100%"
+        height="200px"
+        style={{
+          objectFit: "cover",
+          borderRadius: "10px",
+          marginBottom: "12px",
+        }}
       />
-      <h3 style={{ margin: "10px 0 5px" }}>{`NFT ${nft.tokenId}`}</h3>
-      <p style={{ margin: "5px 0" }}>#{nft.tokenId}</p>
-      <p style={{ margin: "5px 0" }}>Precio: {nft.price} ETH</p>
-      {nft.isSold && (
-        <p style={{ color: "green", fontWeight: "bold" }}>✅ Comprado</p>
+      <h3
+        style={{ margin: "0 0 6px", fontSize: "1.1rem" }}
+      >{`NFT #${nft.tokenId}`}</h3>
+      <p
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "6px",
+        }}
+      >
+        <FaEthereum /> {nft.price} ETH
+      </p>
+
+      {isSold && (
+        <p style={{ color: "lime", fontWeight: "bold", marginTop: "10px" }}>
+          <BsCheckCircleFill /> Comprado
+        </p>
       )}
-      {!isOwner && !nft.isSold && (
+
+      {!isOwner && !isSold && (
         <button
           onClick={() => onBuy(nft.tokenId, nft.price)}
           style={{
-            padding: "8px 16px",
+            padding: "10px 20px",
             backgroundColor: "#007bff",
             color: "#fff",
             border: "none",
-            borderRadius: "5px",
+            borderRadius: "6px",
             cursor: "pointer",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "8px",
             marginTop: "10px",
           }}
         >
-          Comprar
+          <AiOutlineShoppingCart /> Comprar
         </button>
       )}
-      {isOwner && !nft.isSold && (
-        <p style={{ color: "orange", fontWeight: "bold" }}>
-          🪙 A la venta (tuyo)
+
+      {isOwner && !isSold && (
+        <p style={{ color: "gold", fontWeight: "bold", marginTop: "10px" }}>
+          <TbCoins /> A la venta (tuyo)
         </p>
       )}
     </div>
