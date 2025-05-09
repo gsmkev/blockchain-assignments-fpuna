@@ -22,6 +22,7 @@ function App() {
   >("store");
   const [mintCount, setMintCount] = useState<number>(1);
   const [pendingAmount, setPendingAmount] = useState<string>("0");
+  const [loading, setLoading] = useState(false);
 
   const CONTRACT_OWNER =
     "0x910b03584659f87344c8b0dffe23da6a1a3ff41c".toLowerCase();
@@ -29,8 +30,10 @@ function App() {
   const firstLoadDone = useRef(false);
 
   const loadItems = async () => {
+    setLoading(true);
     const data = await getAllListings();
     setNfts(data);
+    setLoading(false);
 
     if (!firstLoadDone.current) {
       if (data.length === 0) {
@@ -72,10 +75,13 @@ function App() {
 
   const handleBuy = async (tokenId: number, price: string) => {
     try {
+      setLoading(true);
       await purchaseNFT(tokenId, price);
+      setLoading(false);
       toast.success(`¡Compra exitosa del NFT #${tokenId} por ${price} ETH!`);
       await loadItems();
     } catch (err) {
+      setLoading(false);
       console.error("Error al comprar:", err);
       toast.error("Hubo un problema al realizar la compra.");
     }
@@ -86,10 +92,13 @@ function App() {
       if (!account) {
         await handleConnect();
       }
+      setLoading(true);
       await mintInitialBatch(mintCount);
+      setLoading(false);
       toast.success(`🎉 Se mintearon ${mintCount} NFT(s) exitosamente`);
       await loadItems();
     } catch (err) {
+      setLoading(false);
       console.error("Mint fallido:", err);
       toast.error("❌ Error al mintear los NFTs.");
     }
@@ -114,10 +123,13 @@ function App() {
         toast.info("No tienes fondos pendientes para retirar.");
         return;
       }
+      setLoading(true);
       await withdrawFunds();
+      setLoading(false);
       toast.success("✅ Retiro exitoso");
       await checkPending();
     } catch (err) {
+      setLoading(false);
       console.error("Error al retirar:", err);
       toast.error("❌ Error al intentar retirar fondos");
     }
@@ -407,7 +419,36 @@ function App() {
         draggable
         pauseOnHover
         theme="dark"
+        style={{ zIndex: 10000 }}
       />
+      {loading && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            width: "100vw",
+            height: "100vh",
+            backgroundColor: "rgba(0,0,0,0.6)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 9999,
+          }}
+        >
+          <div
+            style={{
+              border: "8px solid #f3f3f3",
+              borderTop: "8px solid #3498db",
+              borderRadius: "50%",
+              width: "80px",
+              height: "80px",
+              animation: "spin 1s linear infinite",
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }
