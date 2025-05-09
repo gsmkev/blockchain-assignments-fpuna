@@ -95,3 +95,29 @@ button:hover {
   transition: opacity 300ms ease, transform 300ms ease;
 }
 
+.tooltip-container {
+  position: absolute;
+  bottom: 120%;
+  left: 50%;
+  transform: translateX(-50%);
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.tooltip-text {
+  background-color: #333;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  white-space: nowrap;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+button:hover + .tooltip-container {
+  visibility: visible;
+  opacity: 1;
+}

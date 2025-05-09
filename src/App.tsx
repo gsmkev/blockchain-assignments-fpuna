@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import {
   connectWallet,
   getAllListings,
+  getPendingWithdrawal,
   mintInitialBatch,
   purchaseNFT,
+  withdrawFunds,
   type NFTItem,
 } from "./utils/marketplace";
 import NFTCard from "./components/NFTCard";
@@ -19,6 +21,7 @@ function App() {
     "store" | "minted" | "purchased" | "sold"
   >("store");
   const [mintCount, setMintCount] = useState<number>(1);
+  const [pendingAmount, setPendingAmount] = useState<string>("0");
 
   const CONTRACT_OWNER =
     "0x910b03584659f87344c8b0dffe23da6a1a3ff41c".toLowerCase();
@@ -92,6 +95,41 @@ function App() {
     }
   };
 
+  const checkPending = async () => {
+    if (account) {
+      const amount = await getPendingWithdrawal(account);
+      setPendingAmount(amount);
+      if (Number(amount) > 0) {
+        toast.info(`Tienes ${amount} ETH pendientes para retirar.`);
+      }
+    }
+  };
+
+  const handleWithdraw = async () => {
+    try {
+      if (!account) {
+        await handleConnect();
+      }
+      if (pendingAmount === "0") {
+        toast.info("No tienes fondos pendientes para retirar.");
+        return;
+      }
+      await withdrawFunds();
+      toast.success("✅ Retiro exitoso");
+      await checkPending();
+    } catch (err) {
+      console.error("Error al retirar:", err);
+      toast.error("❌ Error al intentar retirar fondos");
+    }
+  };
+
+  useEffect(() => {
+    silentConnect().then(() => {
+      loadItems();
+      checkPending();
+    });
+  }, [account]);
+
   useEffect(() => {
     silentConnect().then(() => loadItems());
   }, []);
@@ -125,24 +163,49 @@ function App() {
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            gap: "10px",
+            gap: "20px",
             margin: "20px 0",
+            flexWrap: "wrap",
           }}
         >
-          <button
-            onClick={handleMint}
-            style={{
-              padding: "10px 24px",
-              backgroundColor: "#28a745",
-              border: "none",
-              borderRadius: "8px",
-              color: "#fff",
-              fontWeight: "bold",
-              cursor: "pointer",
-            }}
-          >
-            🧙‍♂️ Mint {mintCount} NFT{mintCount > 1 ? "s" : ""}
-          </button>
+          <div style={{ position: "relative" }}>
+            <button
+              onClick={handleMint}
+              style={{
+                padding: "10px 24px",
+                backgroundColor: "#28a745",
+                border: "none",
+                borderRadius: "8px",
+                color: "#fff",
+                fontWeight: "bold",
+                cursor: "pointer",
+              }}
+            >
+              🧙‍♂️ Mint {mintCount} NFT{mintCount > 1 ? "s" : ""}
+            </button>
+            <span
+              style={{
+                visibility: "hidden",
+                width: "200px",
+                backgroundColor: "#555",
+                color: "#fff",
+                textAlign: "center",
+                borderRadius: "6px",
+                padding: "5px",
+                position: "absolute",
+                zIndex: 1,
+                bottom: "125%",
+                left: "50%",
+                marginLeft: "-100px",
+                opacity: 0,
+                transition: "opacity 0.3s",
+              }}
+              className="tooltip-text"
+            >
+              Mintea NFTs para la tienda
+            </span>
+          </div>
+
           <div
             style={{
               display: "flex",
@@ -211,8 +274,55 @@ function App() {
               +
             </button>
           </div>
+
+          {Number(pendingAmount) > 0 && (
+            <div style={{ position: "relative" }}>
+              <button
+                onClick={handleWithdraw}
+                style={{
+                  padding: "10px 24px",
+                  backgroundColor: "#ffc107",
+                  border: "none",
+                  borderRadius: "8px",
+                  color: "#000",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  boxShadow: "0 4px 8px rgba(0,0,0,0.3)",
+                  transition: "transform 0.2s",
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.transform = "scale(1.05)")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.transform = "scale(1)")
+                }
+              >
+                🔓 Retirar Fondos ({pendingAmount} ETH)
+              </button>
+
+              <div className="tooltip-container">
+                <span className="tooltip-text">
+                  Retira tus fondos acumulados por ventas
+                </span>
+              </div>
+            </div>
+          )}
         </div>
       )}
+
+      <style>
+        {`
+          .tooltip-text {
+        visibility: hidden;
+        opacity: 0;
+          }
+
+          div:hover .tooltip-text {
+        visibility: visible;
+        opacity: 1;
+          }
+        `}
+      </style>
 
       <div
         style={{ display: "flex", justifyContent: "center", marginTop: "30px" }}

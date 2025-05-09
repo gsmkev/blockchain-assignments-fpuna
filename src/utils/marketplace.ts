@@ -81,11 +81,23 @@ export async function mintInitialBatch(count: number = 10) {
     const price = parseEther("0.01");
 
     try {
-      console.log(`Minting NFT ${i + 1} with URI: ${uri} and price: ${price}`);
       const tx = await contract.mintAndList(uri, price);
       await tx.wait();
     } catch (e) {
       console.error(`Error minting NFT ${i + 1}:`, e);
     }
   }
+}
+
+export async function withdrawFunds(): Promise<void> {
+  const contract = await getContract();
+  const tx = await contract.withdraw();
+  await tx.wait();
+}
+
+export async function getPendingWithdrawal(account: string): Promise<string> {
+  const provider = new BrowserProvider(window.ethereum);
+  const contract = new Contract(CONTRACT_ADDRESS, abi, provider);
+  const amount = await contract.pendingWithdrawals(account);
+  return formatEther(amount);
 }
