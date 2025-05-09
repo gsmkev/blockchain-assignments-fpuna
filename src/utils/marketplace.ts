@@ -1,7 +1,8 @@
-import { ethers } from "ethers";
+import { Contract, BrowserProvider, formatEther, parseEther } from "ethers";
 import abi from "../abi.json";
 
 const CONTRACT_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS;
+
 declare global {
   interface Window {
     ethereum?: any;
@@ -9,9 +10,9 @@ declare global {
 }
 
 const getContract = async () => {
-  const provider = new ethers.providers.Web3Provider(window.ethereum);
-  const signer = provider.getSigner();
-  return new ethers.Contract(CONTRACT_ADDRESS, abi, signer);
+  const provider = new BrowserProvider(window.ethereum);
+  const signer = await provider.getSigner();
+  return new Contract(CONTRACT_ADDRESS, abi, signer);
 };
 
 export interface NFTItem {
@@ -30,15 +31,16 @@ export async function connectWallet(): Promise<string> {
 }
 
 export async function getAllListings(): Promise<NFTItem[]> {
-  const provider = new ethers.providers.Web3Provider(window.ethereum);
-  const contract = new ethers.Contract(
-    CONTRACT_ADDRESS,
-    abi,
-    provider.getSigner()
-  );
+  const provider = new BrowserProvider(window.ethereum);
+  const contract = new Contract(CONTRACT_ADDRESS, abi, provider); // ✅ solo lectura
   const items: NFTItem[] = [];
 
-  // Obtener el total real de NFTs creados
+  const code = await provider.getCode(CONTRACT_ADDRESS);
+  console.log("code", code);
+  if (code === "0x") {
+    throw new Error("❌ No hay contrato en esta dirección.");
+  }
+
   const total = await contract.tokenCounter();
 
   for (let i = 0; i < Number(total); i++) {
@@ -48,7 +50,7 @@ export async function getAllListings(): Promise<NFTItem[]> {
       items.push({
         tokenId: i,
         owner,
-        price: ethers.utils.formatEther(price),
+        price: formatEther(price),
         isSold,
         uri,
       });
@@ -64,7 +66,7 @@ export async function getAllListings(): Promise<NFTItem[]> {
 export async function purchaseNFT(tokenId: number, price: string) {
   const contract = await getContract();
   const tx = await contract.buy(tokenId, {
-    value: ethers.utils.formatEther(price),
+    value: parseEther(price),
   });
   await tx.wait();
 }
@@ -75,7 +77,7 @@ export async function mintInitialBatch(count: number = 10) {
   for (let i = 0; i < count; i++) {
     const seed = Date.now() + i;
     const uri = `https://picsum.photos/200?random=${seed}`;
-    const price = ethers.utils.parseEther("0.01");
+    const price = parseEther("0.01");
 
     try {
       console.log(`Minting NFT ${i + 1} with URI: ${uri} and price: ${price}`);
