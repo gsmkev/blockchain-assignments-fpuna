@@ -36,10 +36,15 @@ function App() {
     setLoading(false);
 
     if (!firstLoadDone.current) {
+      toast.dismiss();
       if (data.length === 0) {
-        toast.info("No hay NFTs disponibles en la tienda.");
+        toast.info("No hay NFTs disponibles en la tienda.", {
+          toastId: "no-nfts",
+        });
       } else {
-        toast.success("NFTs cargados correctamente.");
+        toast.success("NFTs cargados correctamente.", {
+          toastId: "nfts-loaded",
+        });
       }
       firstLoadDone.current = true;
     }
@@ -54,9 +59,15 @@ function App() {
         const acc = await connectWallet();
         setAccount(acc);
         localStorage.setItem("connected", "true");
-        toast.info("👋 Bienvenido de vuelta.");
+        toast.info("👋 Bienvenido de vuelta.", {
+          toastId: "welcome-back",
+        });
       } catch (err) {
         console.warn("Silent wallet connect failed:", err);
+        toast.dismiss();
+        toast.error("❌ Error al conectar la billetera.", {
+          toastId: "silent-connect-error",
+        });
       }
     }
   };
@@ -66,10 +77,16 @@ function App() {
       const acc = await connectWallet();
       setAccount(acc);
       localStorage.setItem("connected", "true");
-      toast.success("🔗 Wallet conectada correctamente");
+      toast.dismiss();
+      toast.success("🔗 Wallet conectada correctamente", {
+        toastId: "wallet-connected",
+      });
     } catch (err) {
       console.error("Conexión rechazada.");
-      toast.error("❌ El usuario rechazó la conexión.");
+      toast.dismiss();
+      toast.error("❌ El usuario rechazó la conexión.", {
+        toastId: "connection-rejected",
+      });
     }
   };
 
@@ -78,12 +95,18 @@ function App() {
       setLoading(true);
       await purchaseNFT(tokenId, price);
       setLoading(false);
-      toast.success(`¡Compra exitosa del NFT #${tokenId} por ${price} ETH!`);
+      toast.dismiss();
+      toast.success(`¡Compra exitosa del NFT #${tokenId} por ${price} ETH!`, {
+        toastId: "purchase-success",
+      });
       await loadItems();
     } catch (err) {
       setLoading(false);
       console.error("Error al comprar:", err);
-      toast.error("Hubo un problema al realizar la compra.");
+      toast.dismiss();
+      toast.error("Hubo un problema al realizar la compra.", {
+        toastId: "purchase-error",
+      });
     }
   };
 
@@ -95,12 +118,18 @@ function App() {
       setLoading(true);
       await mintInitialBatch(mintCount);
       setLoading(false);
-      toast.success(`🎉 Se mintearon ${mintCount} NFT(s) exitosamente`);
+      toast.dismiss();
+      toast.success(`🎉 Se mintearon ${mintCount} NFT(s) exitosamente`, {
+        toastId: "mint-success",
+      });
       await loadItems();
     } catch (err) {
       setLoading(false);
       console.error("Mint fallido:", err);
-      toast.error("❌ Error al mintear los NFTs.");
+      toast.dismiss();
+      toast.error("❌ Error al mintear los NFTs.", {
+        toastId: "mint-error",
+      });
     }
   };
 
@@ -109,7 +138,10 @@ function App() {
       const amount = await getPendingWithdrawal(account);
       setPendingAmount(amount);
       if (Number(amount) > 0) {
-        toast.info(`Tienes ${amount} ETH pendientes para retirar.`);
+        toast.dismiss();
+        toast.info(`Tienes ${amount} ETH pendientes para retirar.`, {
+          toastId: "pending-withdrawal",
+        });
       }
     }
   };
@@ -120,18 +152,23 @@ function App() {
         await handleConnect();
       }
       if (pendingAmount === "0") {
-        toast.info("No tienes fondos pendientes para retirar.");
         return;
       }
       setLoading(true);
       await withdrawFunds();
       setLoading(false);
-      toast.success("✅ Retiro exitoso");
+      toast.dismiss();
+      toast.success("✅ Retiro exitoso", {
+        toastId: "withdraw-success",
+      });
       await checkPending();
     } catch (err) {
       setLoading(false);
       console.error("Error al retirar:", err);
-      toast.error("❌ Error al intentar retirar fondos");
+      toast.dismiss();
+      toast.error("❌ Error al intentar retirar fondos", {
+        toastId: "withdraw-error",
+      });
     }
   };
 
