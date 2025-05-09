@@ -7,7 +7,7 @@ import {
   purchaseNFT,
   withdrawFunds,
   type NFTItem,
-} from "./utils/marketplace";
+} from "./utils/marketplace"; // Funciones de interacción con el contrato
 import NFTCard from "./components/NFTCard";
 import WalletConnect from "./components/WalletConnect";
 import { FaStore, FaPalette, FaGift } from "react-icons/fa";
@@ -15,13 +15,13 @@ import { ToastContainer, toast } from "react-toastify";
 import "./App.css";
 
 function App() {
-  const [account, setAccount] = useState<string | null>(null);
-  const [nfts, setNfts] = useState<NFTItem[]>([]);
+  const [account, setAccount] = useState<string | null>(null); // Dirección de la wallet conectada
+  const [nfts, setNfts] = useState<NFTItem[]>([]); // Lista de NFTs
   const [activeTab, setActiveTab] = useState<
     "store" | "minted" | "purchased" | "sold"
   >("store");
-  const [mintCount, setMintCount] = useState<number>(1);
-  const [pendingAmount, setPendingAmount] = useState<string>("0");
+  const [mintCount, setMintCount] = useState<number>(1); // Cantidad a mintear
+  const [pendingAmount, setPendingAmount] = useState<string>("0"); // ETH pendiente por retirar
   const [loading, setLoading] = useState(false);
 
   const CONTRACT_OWNER =
@@ -29,6 +29,7 @@ function App() {
 
   const firstLoadDone = useRef(false);
 
+  // Carga NFTs del contrato
   const loadItems = async () => {
     setLoading(true);
     const data = await getAllListings();
@@ -50,6 +51,7 @@ function App() {
     }
   };
 
+  // Conexión silenciosa si ya estaba conectada la wallet
   const silentConnect = async () => {
     if (
       window.ethereum &&
@@ -72,6 +74,7 @@ function App() {
     }
   };
 
+  // Conexión manual de la wallet
   const handleConnect = async () => {
     try {
       const acc = await connectWallet();
@@ -90,6 +93,7 @@ function App() {
     }
   };
 
+  // Compra de un NFT
   const handleBuy = async (tokenId: number, price: string) => {
     try {
       setLoading(true);
@@ -110,6 +114,7 @@ function App() {
     }
   };
 
+  // Mintea un lote inicial de NFTs
   const handleMint = async () => {
     try {
       if (!account) {
@@ -133,6 +138,7 @@ function App() {
     }
   };
 
+  // Verifica si hay fondos pendientes para retirar
   const checkPending = async () => {
     if (account) {
       const amount = await getPendingWithdrawal(account);
@@ -146,6 +152,7 @@ function App() {
     }
   };
 
+  // Retira los fondos pendientes
   const handleWithdraw = async () => {
     try {
       if (!account) {
@@ -172,6 +179,7 @@ function App() {
     }
   };
 
+  // Conexión inicial al cargar la app
   useEffect(() => {
     silentConnect().then(() => {
       loadItems();
@@ -179,10 +187,12 @@ function App() {
     });
   }, [account]);
 
+  // Carga inicial de NFTs al montar el componente
   useEffect(() => {
     silentConnect().then(() => loadItems());
   }, []);
 
+  // Filtra los NFTs según la pestaña activa
   const marketplaceNFTs = nfts.filter((nft) => !nft.isSold);
   const myMintedNFTs = nfts;
   const myPurchasedNFTs = nfts.filter(
@@ -190,6 +200,7 @@ function App() {
   );
   const soldNFTs = nfts.filter((nft) => nft.isSold);
 
+  // Estilo de los botones de las pestañas
   const tabStyle = (tab: string) => ({
     padding: "12px 24px",
     margin: "0 8px",
@@ -204,8 +215,11 @@ function App() {
   return (
     <div className="container">
       <h1 style={{ marginBottom: "10px" }}>NFT Marketplace</h1>
+
+      {/* Conexión de la wallet */}
       <WalletConnect account={account} onConnect={handleConnect} />
 
+      {/* Botón para mintear NFTs y retirar fondos solo visible para el dueño del contrato */}
       {account?.toLowerCase() === CONTRACT_OWNER && (
         <div
           style={{
@@ -359,20 +373,7 @@ function App() {
         </div>
       )}
 
-      <style>
-        {`
-          .tooltip-text {
-        visibility: hidden;
-        opacity: 0;
-          }
-
-          div:hover .tooltip-text {
-        visibility: visible;
-        opacity: 1;
-          }
-        `}
-      </style>
-
+      {/* Pestañas de navegación */}
       <div
         style={{ display: "flex", justifyContent: "center", marginTop: "30px" }}
       >
@@ -404,6 +405,7 @@ function App() {
         )}
       </div>
 
+      {/* Contenido de las pestañas */}
       <div className="grid">
         {activeTab === "store" &&
           marketplaceNFTs.map((nft) => (
@@ -446,6 +448,7 @@ function App() {
           ))}
       </div>
 
+      {/* Mensajes de error y éxito */}
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -458,6 +461,8 @@ function App() {
         theme="dark"
         style={{ zIndex: 10000 }}
       />
+
+      {/* Spinner de carga */}
       {loading && (
         <div
           style={{

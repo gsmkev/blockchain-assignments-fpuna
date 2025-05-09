@@ -60,24 +60,26 @@ export default function NFTCard({ nft, onBuy, currentAccount }: Props) {
       )}
 
       {!isOwner && !isSold && (
-        <button
-          onClick={() => onBuy(nft.tokenId, nft.price)}
-          style={{
-            padding: "10px 20px",
-            backgroundColor: "#007bff",
-            color: "#fff",
-            border: "none",
-            borderRadius: "6px",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "8px",
-            marginTop: "10px",
-          }}
-        >
-          <AiOutlineShoppingCart /> Comprar
-        </button>
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <button
+            onClick={() => onBuy(nft.tokenId, nft.price)}
+            style={{
+              padding: "10px 20px",
+              backgroundColor: "#007bff",
+              color: "#fff",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px",
+              marginTop: "10px",
+            }}
+          >
+            <AiOutlineShoppingCart /> Comprar
+          </button>
+        </div>
       )}
 
       {isOwner && !isSold && (

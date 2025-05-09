@@ -9,6 +9,7 @@ declare global {
   }
 }
 
+// Conecta con el contrato usando el signer del navegador
 const getContract = async () => {
   const provider = new BrowserProvider(window.ethereum);
   const signer = await provider.getSigner();
@@ -24,6 +25,7 @@ export interface NFTItem {
   uri: string;
 }
 
+// Solicita conexión de la wallet al usuario
 export async function connectWallet(): Promise<string> {
   const [address] = await window.ethereum.request({
     method: "eth_requestAccounts",
@@ -31,6 +33,7 @@ export async function connectWallet(): Promise<string> {
   return address;
 }
 
+// Obtiene todas las NFTs listadas desde el contrato
 export async function getAllListings(): Promise<NFTItem[]> {
   const provider = new BrowserProvider(window.ethereum);
   const contract = new Contract(CONTRACT_ADDRESS, abi, provider);
@@ -64,6 +67,7 @@ export async function getAllListings(): Promise<NFTItem[]> {
   return items;
 }
 
+// Ejecuta la compra de un NFT
 export async function purchaseNFT(tokenId: number, price: string) {
   const contract = await getContract();
   const tx = await contract.buy(tokenId, {
@@ -72,6 +76,7 @@ export async function purchaseNFT(tokenId: number, price: string) {
   await tx.wait();
 }
 
+// Genera un batch inicial de NFTs listados con imágenes aleatorias
 export async function mintInitialBatch(count: number = 10) {
   const contract = await getContract();
 
@@ -89,12 +94,14 @@ export async function mintInitialBatch(count: number = 10) {
   }
 }
 
+// Permite al usuario retirar fondos pendientes
 export async function withdrawFunds(): Promise<void> {
   const contract = await getContract();
   const tx = await contract.withdraw();
   await tx.wait();
 }
 
+// Consulta el saldo pendiente de retiro para una cuenta
 export async function getPendingWithdrawal(account: string): Promise<string> {
   const provider = new BrowserProvider(window.ethereum);
   const contract = new Contract(CONTRACT_ADDRESS, abi, provider);
