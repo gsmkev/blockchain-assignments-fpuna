@@ -278,6 +278,11 @@
         "type": "address"
       },
       {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
         "internalType": "uint96",
         "name": "",
         "type": "uint96"
@@ -328,6 +333,11 @@
       {
         "internalType": "address",
         "name": "owner",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "buyer",
         "type": "address"
       },
       {

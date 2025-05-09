@@ -99,10 +99,7 @@ function App() {
   const marketplaceNFTs = nfts.filter((nft) => !nft.isSold);
   const myMintedNFTs = nfts;
   const myPurchasedNFTs = nfts.filter(
-    (nft) =>
-      nft.isSold &&
-      nft.owner.toLowerCase() === account?.toLowerCase() &&
-      account?.toLowerCase() !== CONTRACT_OWNER
+    (nft) => nft.isSold && nft.buyer?.toLowerCase() === account?.toLowerCase()
   );
   const soldNFTs = nfts.filter((nft) => nft.isSold);
 

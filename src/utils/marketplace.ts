@@ -18,6 +18,7 @@ const getContract = async () => {
 export interface NFTItem {
   tokenId: number;
   owner: string;
+  buyer: string;
   price: string;
   isSold: boolean;
   uri: string;
@@ -32,7 +33,7 @@ export async function connectWallet(): Promise<string> {
 
 export async function getAllListings(): Promise<NFTItem[]> {
   const provider = new BrowserProvider(window.ethereum);
-  const contract = new Contract(CONTRACT_ADDRESS, abi, provider); // ✅ solo lectura
+  const contract = new Contract(CONTRACT_ADDRESS, abi, provider);
   const items: NFTItem[] = [];
 
   const code = await provider.getCode(CONTRACT_ADDRESS);
@@ -44,11 +45,12 @@ export async function getAllListings(): Promise<NFTItem[]> {
 
   for (let i = 0; i < Number(total); i++) {
     try {
-      const [owner, price, isSold] = await contract.getListing(i);
+      const [owner, buyer, price, isSold] = await contract.getListing(i);
       const uri = await contract.tokenURI(i);
       items.push({
         tokenId: i,
         owner,
+        buyer,
         price: formatEther(price),
         isSold,
         uri,

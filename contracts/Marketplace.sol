@@ -11,6 +11,7 @@ contract Marketplace is ERC721URIStorage, Ownable, ReentrancyGuard {
 
     struct Listing {
         address owner;
+        address buyer;
         uint96 price;
         bool isSold;
     }
@@ -32,7 +33,13 @@ contract Marketplace is ERC721URIStorage, Ownable, ReentrancyGuard {
         _mint(msg.sender, tokenId);
         _setTokenURI(tokenId, _uri);
 
-        listings[tokenId] = Listing(msg.sender, _price, false);
+        listings[tokenId] = Listing({
+            owner: msg.sender,
+            buyer: address(0),
+            price: _price,
+            isSold: false
+        });
+
         tokenCounter++;
 
         emit ItemListed(tokenId, msg.sender, _price);
@@ -44,6 +51,7 @@ contract Marketplace is ERC721URIStorage, Ownable, ReentrancyGuard {
         require(msg.value == item.price, "Incorrect price");
 
         item.isSold = true;
+        item.buyer = msg.sender;
         pendingWithdrawals[item.owner] += msg.value;
 
         _transfer(item.owner, msg.sender, _tokenId);
@@ -59,8 +67,8 @@ contract Marketplace is ERC721URIStorage, Ownable, ReentrancyGuard {
 
     function getListing(
         uint256 _tokenId
-    ) external view returns (address, uint96, bool) {
+    ) external view returns (address, address, uint96, bool) {
         Listing memory item = listings[_tokenId];
-        return (item.owner, item.price, item.isSold);
+        return (item.owner, item.buyer, item.price, item.isSold);
     }
 }
