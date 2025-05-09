@@ -15,9 +15,9 @@ import "./App.css";
 function App() {
   const [account, setAccount] = useState<string | null>(null);
   const [nfts, setNfts] = useState<NFTItem[]>([]);
-  const [activeTab, setActiveTab] = useState<"store" | "minted" | "purchased">(
-    "store"
-  );
+  const [activeTab, setActiveTab] = useState<
+    "store" | "minted" | "purchased" | "sold"
+  >("store");
   const [mintCount, setMintCount] = useState<number>(1);
 
   const CONTRACT_OWNER =
@@ -97,12 +97,14 @@ function App() {
   }, []);
 
   const marketplaceNFTs = nfts.filter((nft) => !nft.isSold);
-  const myMintedNFTs = nfts.filter(
-    (nft) => !nft.isSold && nft.owner.toLowerCase() === account?.toLowerCase()
-  );
+  const myMintedNFTs = nfts;
   const myPurchasedNFTs = nfts.filter(
-    (nft) => nft.isSold && nft.owner.toLowerCase() === account?.toLowerCase()
+    (nft) =>
+      nft.isSold &&
+      nft.owner.toLowerCase() === account?.toLowerCase() &&
+      account?.toLowerCase() !== CONTRACT_OWNER
   );
+  const soldNFTs = nfts.filter((nft) => nft.isSold);
 
   const tabStyle = (tab: string) => ({
     padding: "12px 24px",
@@ -221,20 +223,29 @@ function App() {
         <button style={tabStyle("store")} onClick={() => setActiveTab("store")}>
           <FaStore /> Tienda
         </button>
-        {account?.toLowerCase() === CONTRACT_OWNER && (
+        {account?.toLowerCase() === CONTRACT_OWNER ? (
+          <>
+            <button
+              style={tabStyle("minted")}
+              onClick={() => setActiveTab("minted")}
+            >
+              <FaPalette /> Mis Minteados
+            </button>
+            <button
+              style={tabStyle("sold")}
+              onClick={() => setActiveTab("sold")}
+            >
+              🛒 Vendidos
+            </button>
+          </>
+        ) : (
           <button
-            style={tabStyle("minted")}
-            onClick={() => setActiveTab("minted")}
+            style={tabStyle("purchased")}
+            onClick={() => setActiveTab("purchased")}
           >
-            <FaPalette /> Mis Minteados
+            <FaGift /> Mis Comprados
           </button>
         )}
-        <button
-          style={tabStyle("purchased")}
-          onClick={() => setActiveTab("purchased")}
-        >
-          <FaGift /> Mis Comprados
-        </button>
       </div>
 
       <div className="grid">
@@ -250,6 +261,16 @@ function App() {
 
         {activeTab === "minted" &&
           myMintedNFTs.map((nft) => (
+            <NFTCard
+              key={nft.tokenId}
+              nft={nft}
+              onBuy={() => {}}
+              currentAccount={account || ""}
+            />
+          ))}
+
+        {activeTab === "sold" &&
+          soldNFTs.map((nft) => (
             <NFTCard
               key={nft.tokenId}
               nft={nft}

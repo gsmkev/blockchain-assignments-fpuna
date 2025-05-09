@@ -36,7 +36,6 @@ export async function getAllListings(): Promise<NFTItem[]> {
   const items: NFTItem[] = [];
 
   const code = await provider.getCode(CONTRACT_ADDRESS);
-  console.log("code", code);
   if (code === "0x") {
     throw new Error("❌ No hay contrato en esta dirección.");
   }
