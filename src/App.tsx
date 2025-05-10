@@ -23,8 +23,7 @@ function App() {
   const [pendingAmount, setPendingAmount] = useState<string>("0"); // ETH pendiente por retirar
   const [loading, setLoading] = useState(false);
 
-  const CONTRACT_OWNER =
-    "0x910b03584659f87344c8b0dffe23da6a1a3ff41c".toLowerCase();
+  const CONTRACT_OWNER = import.meta.env.VITE_CONTRACT_OWNER.toLowerCase();
 
   const firstLoadDone = useRef(false);
 
