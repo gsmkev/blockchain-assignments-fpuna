@@ -26,3 +26,5 @@ typechain-types
 *.sln
 *.sw?
 .env
+.vercel
+/metadata

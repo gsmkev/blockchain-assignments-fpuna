@@ -3,6 +3,7 @@ import { BsCheckCircleFill } from "react-icons/bs";
 import { AiOutlineShoppingCart } from "react-icons/ai";
 import { TbCoins } from "react-icons/tb";
 import type { NFTItem } from "../utils/marketplace";
+import { useEffect, useState } from "react";
 
 type Props = {
   nft: NFTItem;
@@ -11,6 +12,7 @@ type Props = {
 };
 
 export default function NFTCard({ nft, onBuy, currentAccount }: Props) {
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
   const isOwner = currentAccount?.toLowerCase() === nft.owner.toLowerCase();
   const isSold = nft.isSold;
 
@@ -26,19 +28,70 @@ export default function NFTCard({ nft, onBuy, currentAccount }: Props) {
     textAlign: "center" as const,
   };
 
+  // Convierte ipfs://... a https://... para los gateways
+  const ipfsToHttp = (ipfsUri: string) =>
+    ipfsUri.replace("ipfs://", "https://ipfs.io/ipfs/");
+
+  // Carga el metadata JSON y extrae la imagen
+  useEffect(() => {
+    const fetchImageFromMetadata = async () => {
+      try {
+        const metadataUrl = ipfsToHttp(nft.uri);
+        const res = await fetch(metadataUrl);
+        const json = await res.json();
+        setImageUrl(ipfsToHttp(json.image));
+      } catch (err) {
+        console.error(`❌ Error cargando metadata de NFT ${nft.tokenId}:`, err);
+      }
+    };
+
+    fetchImageFromMetadata();
+  }, [nft.uri, nft.tokenId]);
+
   return (
     <div style={cardStyle}>
-      <img
-        src={nft.uri}
-        alt={`NFT ${nft.tokenId}`}
-        width="100%"
-        height="200px"
-        style={{
-          objectFit: "cover",
-          borderRadius: "10px",
-          marginBottom: "12px",
-        }}
-      />
+      {imageUrl ? (
+        <img
+          src={imageUrl}
+          alt={`NFT ${nft.tokenId}`}
+          width="100%"
+          height="200px"
+          style={{
+            objectFit: "cover",
+            borderRadius: "10px",
+            marginBottom: "12px",
+          }}
+        />
+      ) : (
+        <div style={{ height: "200px", marginBottom: "12px", color: "#888" }}>
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100vw",
+              height: "100vh",
+              backgroundColor: "rgba(0,0,0,0.6)",
+              backdropFilter: "blur(4px)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 9999,
+            }}
+          >
+            <div
+              style={{
+                border: "8px solid #f3f3f3",
+                borderTop: "8px solid #3498db",
+                borderRadius: "50%",
+                width: "80px",
+                height: "80px",
+                animation: "spin 1s linear infinite",
+              }}
+            />
+          </div>
+        </div>
+      )}
       <h3
         style={{ margin: "0 0 6px", fontSize: "1.1rem" }}
       >{`NFT #${nft.tokenId}`}</h3>
@@ -59,7 +112,7 @@ export default function NFTCard({ nft, onBuy, currentAccount }: Props) {
         </p>
       )}
 
-      {!isOwner && !isSold && (
+      {!isOwner && !isSold && currentAccount != "" && (
         <div style={{ display: "flex", justifyContent: "center" }}>
           <button
             onClick={() => onBuy(nft.tokenId, nft.price)}

@@ -20,7 +20,6 @@ function App() {
   const [activeTab, setActiveTab] = useState<
     "store" | "minted" | "purchased" | "sold"
   >("store");
-  const [mintCount, setMintCount] = useState<number>(1); // Cantidad a mintear
   const [pendingAmount, setPendingAmount] = useState<string>("0"); // ETH pendiente por retirar
   const [loading, setLoading] = useState(false);
 
@@ -121,10 +120,10 @@ function App() {
         await handleConnect();
       }
       setLoading(true);
-      await mintInitialBatch(mintCount);
+      await mintInitialBatch();
       setLoading(false);
       toast.dismiss();
-      toast.success(`🎉 Se mintearon ${mintCount} NFT(s) exitosamente`, {
+      toast.success(`🎉 Se mintearon 10 NFT(s) exitosamente`, {
         toastId: "mint-success",
       });
       await loadItems();
@@ -244,7 +243,7 @@ function App() {
                 cursor: "pointer",
               }}
             >
-              🧙‍♂️ Mint {mintCount} NFT{mintCount > 1 ? "s" : ""}
+              🧙‍♂️ Mint initial batch (10)
             </button>
             <span
               style={{
@@ -267,75 +266,6 @@ function App() {
             >
               Mintea NFTs para la tienda
             </span>
-          </div>
-
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              backgroundColor: "#1f1f1f",
-              border: "1px solid #555",
-              borderRadius: "8px",
-              padding: "6px",
-              gap: "8px",
-            }}
-          >
-            <button
-              onClick={() => setMintCount((prev) => Math.max(1, prev - 1))}
-              style={{
-                padding: "6px 12px",
-                backgroundColor: "#444",
-                border: "none",
-                borderRadius: "6px",
-                color: "#fff",
-                fontWeight: "bold",
-                cursor: "pointer",
-                fontSize: "18px",
-                transition: "background 0.2s",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor = "#555")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = "#444")
-              }
-            >
-              –
-            </button>
-
-            <span
-              style={{
-                minWidth: "40px",
-                textAlign: "center",
-                fontSize: "16px",
-                color: "#fff",
-              }}
-            >
-              {mintCount}
-            </span>
-
-            <button
-              onClick={() => setMintCount((prev) => Math.min(10, prev + 1))}
-              style={{
-                padding: "6px 12px",
-                backgroundColor: "#444",
-                border: "none",
-                borderRadius: "6px",
-                color: "#fff",
-                fontWeight: "bold",
-                cursor: "pointer",
-                fontSize: "18px",
-                transition: "background 0.2s",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.backgroundColor = "#555")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.backgroundColor = "#444")
-              }
-            >
-              +
-            </button>
           </div>
 
           {Number(pendingAmount) > 0 && (
