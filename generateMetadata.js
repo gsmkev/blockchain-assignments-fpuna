@@ -12,7 +12,7 @@ if (!fs.existsSync(METADATA_DIR)) {
 
 for (let i = 1; i <= 10; i++) {
   const metadata = {
-    name: `NFT #${i}`,
+    name: `NFT #${i - 1}`,
     description: "NFT con imagen alojada en IPFS (formato webp)",
     image: `ipfs://${IMAGE_CID}/${i}.webp`,
   };
